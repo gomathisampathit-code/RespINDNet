@@ -34,12 +34,15 @@ df["submissiondate"] = df["submissiondate"].dt.tz_localize(None)
 today_str = pd.Timestamp.today().strftime("%Y-%m-%d")
 df_today = df[(df["submissiondate"].dt.strftime("%Y-%m-%d") == today_str) & (df["sp_col"] == 1)].copy()
 
-# Barcode ID
-df_today["barcode_id"] = np.where(
-    df_today["sample_scan"].notna() & (df_today["sample_scan"].astype(str).str.strip() != ""),
-    df_today["sample_scan"],
-    df_today["sample_scan_manually"]
-)
+# Barcode ID: standard fields first, then the 24-month fields
+barcode = pd.Series(np.nan, index=df_today.index, dtype=object)
+for c in ["sample_scan", "sample_scan_manually",
+          "sample_scan_24m", "sample_scan_manually_24m"]:
+    if c in df_today.columns:
+        s = df_today[c]
+        s = s.where(s.astype(str).str.strip() != "")   # blank -> NaN
+        barcode = barcode.fillna(s)
+df_today["barcode_id"] = barcode
 
 # Sample type mapping
 stype_mapping = {"B": "Blood", "R": "Respiratory swab", "D": "Diarrhoea", "S": "Stool (monthly)","P": "24-month respiratory sample"}
