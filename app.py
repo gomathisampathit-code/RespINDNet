@@ -42,10 +42,10 @@ df_today["barcode_id"] = np.where(
 )
 
 # Sample type mapping
-stype_mapping = {"B": "Blood", "R": "Respiratory swab", "D": "Diarrhoea", "S": "Stool (monthly)"}
+stype_mapping = {"B": "Blood", "R": "Respiratory swab", "D": "Diarrhoea", "S": "Stool (monthly)","P": "24-month respiratory sample"}
 df_today["stype"] = df_today["stype"].astype(str).str.strip().str.upper()
 df_today["type_of_sample"] = df_today["stype"].map(stype_mapping)
-df_today = df_today[df_today["type_of_sample"].isin(["Blood", "Respiratory swab"])]
+df_today = df_today[df_today["type_of_sample"].isin(["Blood", "Respiratory swab", "24-month respiratory sample"])]
 df_today["sample_sequence"] = df_today.groupby("child_id").cumcount() + 1
 
 # Merge delivery date
